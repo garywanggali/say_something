@@ -1,8 +1,19 @@
 #!/bin/bash
 
+# 0. Configure Virtual Environment
+echo "Configuring virtual environment..."
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
+
+echo "Activating virtual environment..."
+# Use . instead of source for better compatibility (e.g. with sh/dash)
+. venv/bin/activate
+
 # 1. Install dependencies
 echo "Installing dependencies..."
-python3 -m pip install -r requirements.txt
+pip install -r requirements.txt
 
 # 2. Make and Apply database migrations
 echo "Applying migrations..."
