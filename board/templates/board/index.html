@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园吐槽墙</title>
+    <!-- Use Pico.css for quick, nice styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body { padding-top: 20px; }
+        .post-card { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .comment-section { margin-left: 20px; margin-top: 10px; font-size: 0.9em; border-left: 3px solid #eee; padding-left: 10px; }
+        .comment-item { margin-bottom: 8px; }
+        .meta-info { font-size: 0.8em; color: #666; }
+        .admin-link { position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1 style="text-align: center;">🗣️ 校园吐槽墙</h1>
+        <p style="text-align: center;">完全匿名，畅所欲言</p>
+
+        <!-- Post Form -->
+        <article>
+            <header><strong>我要吐槽</strong></header>
+            <form action="{% url 'add_post' %}" method="post">
+                {% csrf_token %}
+                {{ post_form.content }}
+                <button type="submit" style="margin-top: 10px;">发布吐槽</button>
+            </form>
+        </article>
+
+        <hr>
+
+        <!-- Posts List -->
+        {% for post in posts %}
+        <div class="post-card">
+            <p>{{ post.content|linebreaks }}</p>
+            <div class="meta-info">发布于 {{ post.created_at|date:"Y-m-d H:i" }}</div>
+
+            <!-- Comments -->
+            <div class="comment-section">
+                {% for comment in post.comments.all %}
+                <div class="comment-item">
+                    <strong>匿名:</strong> {{ comment.content }} 
+                    <span class="meta-info">({{ comment.created_at|date:"m-d H:i" }})</span>
+                </div>
+                {% empty %}
+                <div class="meta-info">暂无评论</div>
+                {% endfor %}
+
+                <!-- Comment Form -->
+                <form action="{% url 'add_comment' post.id %}" method="post" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <div class="grid">
+                        <div>
+                            {{ comment_form.content }}
+                        </div>
+                        <div style="width: 100px;">
+                            <button type="submit" class="secondary outline" style="font-size: 0.8em; padding: 5px;">评论</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <article>
+            <p style="text-align: center;">还没有人吐槽，快来抢沙发！</p>
+        </article>
+        {% endfor %}
+    </main>
+
+    <a href="/admin/" class="admin-link">管理员入口</a>
+</body>
+</html>
