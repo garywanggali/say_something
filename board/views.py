@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Count
 from .models import Post
 from .forms import PostForm, CommentForm
 
 def index(request):
-    posts = Post.objects.all()
+    # Sort by number of comments (descending) first, then by creation time (newest first)
+    posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments', '-created_at')
+    
     post_form = PostForm()
     comment_form = CommentForm()
     
