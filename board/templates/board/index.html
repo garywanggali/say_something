@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>校园吐槽墙</title>
-    <!-- Use Pico.css -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
         :root {
             --primary: #1095c1;
             --primary-hover: #08769b;
         }
-        body { padding-bottom: 80px; background-color: #f9f9f9; }
-        .container { max-width: 800px; }
+        body { padding-bottom: 80px; background-color: #f0f2f5; }
         
         /* Navbar */
         .navbar {
@@ -27,94 +25,102 @@
         }
         .navbar-title { font-weight: bold; font-size: 1.2rem; color: #333; margin: 0; }
 
+        /* Masonry Layout */
+        .masonry-grid {
+            column-count: 3;
+            column-gap: 20px;
+        }
+        @media (max-width: 992px) {
+            .masonry-grid { column-count: 2; }
+        }
+        @media (max-width: 600px) {
+            .masonry-grid { column-count: 1; }
+        }
+
         /* Post Card */
         .post-card { 
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 20px; 
-            padding: 20px;
+            padding: 15px;
             border: none;
+            break-inside: avoid; /* Prevent split across columns */
+            display: inline-block; /* Fix for column layout rendering */
+            width: 100%;
+            transition: transform 0.2s;
         }
-        .post-content { font-size: 1.1em; color: #222; margin-bottom: 10px; white-space: pre-wrap; }
-        .post-meta { font-size: 0.8em; color: #999; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .post-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .post-content { font-size: 1em; color: #333; margin-bottom: 10px; white-space: pre-wrap; line-height: 1.5; }
+        .post-meta { font-size: 0.75em; color: #999; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         
         /* Comments */
+        .comment-toggle-btn {
+            background: none; border: none; padding: 5px 0;
+            color: var(--primary); font-size: 0.8em; cursor: pointer;
+            width: auto; margin: 0;
+        }
+        .comment-toggle-btn:hover { text-decoration: underline; background: none; color: var(--primary-hover); }
+
         .comment-section { 
             background-color: #f7f9fa; 
             border-radius: 8px; 
-            padding: 10px 15px;
-            margin-top: 15px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none; /* Hidden by default */
         }
+        .comment-section.show { display: block; }
+
         .comment-item { 
             border-bottom: 1px solid #eef0f2; 
-            padding: 8px 0; 
-            font-size: 0.9em;
+            padding: 6px 0; 
+            font-size: 0.85em;
         }
         .comment-item:last-child { border-bottom: none; }
-        .comment-content { color: #444; }
-        .comment-meta { font-size: 0.75em; color: #aaa; margin-left: 5px; }
+        .comment-content { color: #555; }
+        .comment-meta { font-size: 0.8em; color: #aaa; margin-left: 5px; }
         .floor-tag { 
-            background: #e0e0e0; color: #555; 
-            font-size: 0.7em; padding: 1px 4px; 
+            background: #e0e0e0; color: #666; 
+            font-size: 0.8em; padding: 1px 5px; 
             border-radius: 4px; margin-right: 5px; 
         }
 
-        /* FAB (Floating Action Button) */
+        /* FAB */
         .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 4px 12px rgba(16, 149, 193, 0.4);
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-            z-index: 100;
-            text-decoration: none;
-            border: none;
+            position: fixed; bottom: 30px; right: 30px;
+            width: 56px; height: 56px;
+            background-color: var(--primary); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 4px 12px rgba(16, 149, 193, 0.4);
+            cursor: pointer; z-index: 100; border: none; padding: 0;
         }
-        .fab:hover { background-color: var(--primary-hover); transform: scale(1.05); color: white; }
+        .fab:hover { background-color: var(--primary-hover); transform: scale(1.05); }
 
         /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; transition: opacity 0.3s ease;
         }
         .modal-overlay.open { display: flex; opacity: 1; }
         .modal-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
+            background: white; padding: 25px; border-radius: 12px;
+            width: 90%; max-width: 500px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
+            transform: translateY(20px); transition: transform 0.3s ease;
         }
         .modal-overlay.open .modal-card { transform: translateY(0); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-weight: bold; font-size: 1.2em; margin: 0; }
-        .close-btn { background: none; border: none; font-size: 1.5em; color: #999; cursor: pointer; padding: 0; line-height: 1; height: auto; width: auto; }
-        
-        /* Form adjustments */
-        textarea { resize: vertical; border-color: #ddd; }
-        .comment-form { display: flex; gap: 10px; margin-top: 10px; }
-        .comment-input { flex-grow: 1; margin-bottom: 0 !important; font-size: 0.9em; padding: 8px; height: 40px; }
-        .comment-btn { width: auto; margin-bottom: 0 !important; padding: 8px 15px; font-size: 0.9em; white-space: nowrap; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-title { font-weight: bold; font-size: 1.1em; margin: 0; }
+        .close-btn { background: none; border: none; font-size: 1.5em; color: #999; cursor: pointer; padding: 0; line-height: 1; width: auto; }
+
+        /* Form */
+        textarea { resize: vertical; border-color: #ddd; font-size: 0.95em; }
+        .comment-form { display: flex; gap: 8px; margin-top: 8px; }
+        .comment-input { flex-grow: 1; margin-bottom: 0 !important; font-size: 0.85em; padding: 6px 10px; height: 36px; }
+        .comment-btn { width: auto; margin-bottom: 0 !important; padding: 0 15px; font-size: 0.85em; height: 36px; line-height: 36px; }
 
         .admin-link { text-align: center; display: block; margin-top: 30px; color: #ccc; font-size: 0.8em; }
     </style>
@@ -128,41 +134,44 @@
     </nav>
 
     <main class="container">
-        <!-- Posts List -->
-        {% for post in posts %}
-        <article class="post-card">
-            <div class="post-content">{{ post.content|linebreaksbr }}</div>
-            <div class="post-meta">
-                <span>#{{ post.id }}</span>
-                <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
-            </div>
-
-            <!-- Comments -->
-            <div class="comment-section">
-                {% for comment in post.comments.all %}
-                <div class="comment-item">
-                    <span class="floor-tag">{{ forloop.counter }}楼</span>
-                    <span class="comment-content">{{ comment.content }}</span>
-                    <span class="comment-meta">{{ comment.created_at|date:"m-d H:i" }}</span>
+        <div class="masonry-grid">
+            {% for post in posts %}
+            <article class="post-card">
+                <div class="post-content">{{ post.content|linebreaksbr }}</div>
+                <div class="post-meta">
+                    <span>#{{ post.id }} · {{ post.created_at|date:"m-d H:i" }}</span>
+                    <button class="comment-toggle-btn" onclick="toggleComments('comment-{{ post.id }}')">
+                        💬 {{ post.comments.count }} 评论
+                    </button>
                 </div>
-                {% empty %}
-                <div style="font-size: 0.8em; color: #999; text-align: center; padding: 5px;">暂无评论，快来抢沙发</div>
-                {% endfor %}
 
-                <!-- Comment Form -->
-                <form action="{% url 'add_comment' post.id %}" method="post" class="comment-form">
-                    {% csrf_token %}
-                    <input type="text" name="content" class="comment-input" placeholder="发表评论..." required>
-                    <button type="submit" class="comment-btn outline">发送</button>
-                </form>
+                <!-- Comments -->
+                <div id="comment-{{ post.id }}" class="comment-section">
+                    {% for comment in post.comments.all %}
+                    <div class="comment-item">
+                        <span class="floor-tag">{{ forloop.counter }}L</span>
+                        <span class="comment-content">{{ comment.content }}</span>
+                    </div>
+                    {% empty %}
+                    <div style="font-size: 0.8em; color: #999; text-align: center; padding: 5px;">暂无评论</div>
+                    {% endfor %}
+
+                    <!-- Comment Form -->
+                    <form action="{% url 'add_comment' post.id %}" method="post" class="comment-form">
+                        {% csrf_token %}
+                        <input type="text" name="content" class="comment-input" placeholder="写评论..." required>
+                        <button type="submit" class="comment-btn outline">发送</button>
+                    </form>
+                </div>
+            </article>
+            {% empty %}
+            <!-- Not in masonry grid if empty -->
+            <div style="text-align: center; grid-column: 1/-1; padding: 50px;">
+                <h3>👻 这里静悄悄的</h3>
+                <p>还没有人吐槽，点击右下角 "+" 号发布第一条吐槽吧！</p>
             </div>
-        </article>
-        {% empty %}
-        <article class="post-card" style="text-align: center; padding: 50px;">
-            <h3>👻 这里静悄悄的</h3>
-            <p>还没有人吐槽，点击右下角 "+" 号发布第一条吐槽吧！</p>
-        </article>
-        {% endfor %}
+            {% endfor %}
+        </div>
         
         <a href="/admin/" class="admin-link">管理员入口</a>
     </main>
@@ -186,28 +195,33 @@
     </div>
 
     <script>
+        // Modal Logic
         const modal = document.getElementById('postModal');
         
         function openModal() {
             modal.style.display = 'flex';
-            // Force reflow for transition
-            modal.offsetHeight;
+            modal.offsetHeight; // Force reflow
             modal.classList.add('open');
         }
 
         function closeModal() {
             modal.classList.remove('open');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
         }
 
-        // Close modal on Escape key
         document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape") {
-                closeModal();
-            }
+            if (event.key === "Escape") closeModal();
         });
+
+        // Toggle Comments Logic
+        function toggleComments(elementId) {
+            const el = document.getElementById(elementId);
+            if (el.classList.contains('show')) {
+                el.classList.remove('show');
+            } else {
+                el.classList.add('show');
+            }
+        }
     </script>
 </body>
 </html>
