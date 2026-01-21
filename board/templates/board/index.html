@@ -56,21 +56,13 @@
         .post-meta { font-size: 0.75em; color: #999; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         
         /* Comments */
-        .comment-toggle-btn {
-            background: none; border: none; padding: 5px 0;
-            color: var(--primary); font-size: 0.8em; cursor: pointer;
-            width: auto; margin: 0;
-        }
-        .comment-toggle-btn:hover { text-decoration: underline; background: none; color: var(--primary-hover); }
-
         .comment-section { 
             background-color: #f7f9fa; 
             border-radius: 8px; 
             padding: 10px;
             margin-top: 10px;
-            display: none; /* Hidden by default */
+            /* display: none; Removed to show comments by default */
         }
-        .comment-section.show { display: block; }
 
         .comment-item { 
             border-bottom: 1px solid #eef0f2; 
@@ -140,20 +132,17 @@
                 <div class="post-content">{{ post.content|linebreaksbr }}</div>
                 <div class="post-meta">
                     <span>#{{ post.id }} · {{ post.created_at|date:"m-d H:i" }}</span>
-                    <button class="comment-toggle-btn" onclick="toggleComments('comment-{{ post.id }}')">
-                        💬 {{ post.comments.count }} 评论
-                    </button>
                 </div>
 
-                <!-- Comments -->
-                <div id="comment-{{ post.id }}" class="comment-section">
+                <!-- Comments (Always Visible) -->
+                <div class="comment-section">
                     {% for comment in post.comments.all %}
                     <div class="comment-item">
                         <span class="floor-tag">{{ forloop.counter }}L</span>
                         <span class="comment-content">{{ comment.content }}</span>
                     </div>
                     {% empty %}
-                    <div style="font-size: 0.8em; color: #999; text-align: center; padding: 5px;">暂无评论</div>
+                    <!-- <div style="font-size: 0.8em; color: #999; text-align: center; padding: 5px;">暂无评论</div> -->
                     {% endfor %}
 
                     <!-- Comment Form -->
@@ -212,16 +201,6 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") closeModal();
         });
-
-        // Toggle Comments Logic
-        function toggleComments(elementId) {
-            const el = document.getElementById(elementId);
-            if (el.classList.contains('show')) {
-                el.classList.remove('show');
-            } else {
-                el.classList.add('show');
-            }
-        }
     </script>
 </body>
 </html>
