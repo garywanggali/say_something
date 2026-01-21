@@ -117,9 +117,53 @@
 
         /* Form */
         textarea { resize: vertical; border-color: #ddd; font-size: 0.95em; }
-        .comment-form { display: flex; gap: 8px; margin-top: 8px; }
-        .comment-input { flex-grow: 1; margin-bottom: 0 !important; font-size: 0.85em; padding: 6px 10px; height: 36px; }
-        .comment-btn { width: auto; margin-bottom: 0 !important; padding: 0 15px; font-size: 0.85em; height: 36px; line-height: 36px; }
+        
+        .comment-form { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 10px; 
+            position: relative;
+        }
+        .comment-input { 
+            flex-grow: 1; 
+            margin-bottom: 0 !important; 
+            font-size: 0.85em; 
+            padding: 8px 12px; 
+            height: 38px; 
+            border-radius: 19px; /* Rounded pill shape */
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+        .comment-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(16, 149, 193, 0.2);
+        }
+        
+        /* Modern Send Button (Icon) */
+        .comment-btn { 
+            width: 38px; 
+            height: 38px; 
+            margin-bottom: 0 !important; 
+            padding: 0; 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            flex-shrink: 0;
+            transition: background-color 0.2s;
+        }
+        .comment-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .comment-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            margin-left: 2px; /* Visual balance */
+        }
 
         .admin-link { text-align: center; display: block; margin-top: 30px; color: #ccc; font-size: 0.8em; }
         
@@ -170,7 +214,9 @@
                     <form action="{% url 'add_comment' post.id %}" method="post" class="comment-form">
                         {% csrf_token %}
                         <input type="text" name="content" class="comment-input" placeholder="写评论..." required>
-                        <button type="submit" class="comment-btn outline">发送</button>
+                        <button type="submit" class="comment-btn" title="发送">
+                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                        </button>
                     </form>
                 </div>
             </article>
