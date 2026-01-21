@@ -26,5 +26,15 @@ echo "Checking admin user..."
 python3 init_admin.py
 
 # 4. Start the server
-echo "Starting server..."
-python3 manage.py runserver 0.0.0.0:8000
+echo "Starting server on port 5100..."
+# Kill any existing process on port 5100 (optional but safe)
+lsof -ti:5100 | xargs -r kill -9
+
+# Start with nohup
+nohup python3 manage.py runserver 0.0.0.0:5100 > runserver.log 2>&1 &
+
+echo "=================================================="
+echo "✅ Server started successfully!"
+echo "📡 Access at: http://YOUR_SERVER_IP:5100/"
+echo "📝 Logs are being written to: runserver.log"
+echo "=================================================="

@@ -4,72 +4,210 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>校园吐槽墙</title>
-    <!-- Use Pico.css for quick, nice styling -->
+    <!-- Use Pico.css -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
-        body { padding-top: 20px; }
-        .post-card { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .comment-section { margin-left: 20px; margin-top: 10px; font-size: 0.9em; border-left: 3px solid #eee; padding-left: 10px; }
-        .comment-item { margin-bottom: 8px; }
-        .meta-info { font-size: 0.8em; color: #666; }
-        .admin-link { position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.8em; }
+        :root {
+            --primary: #1095c1;
+            --primary-hover: #08769b;
+        }
+        body { padding-bottom: 80px; background-color: #f9f9f9; }
+        .container { max-width: 800px; }
+        
+        /* Navbar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 99;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .navbar-title { font-weight: bold; font-size: 1.2rem; color: #333; margin: 0; }
+
+        /* Post Card */
+        .post-card { 
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px; 
+            padding: 20px;
+            border: none;
+        }
+        .post-content { font-size: 1.1em; color: #222; margin-bottom: 10px; white-space: pre-wrap; }
+        .post-meta { font-size: 0.8em; color: #999; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        
+        /* Comments */
+        .comment-section { 
+            background-color: #f7f9fa; 
+            border-radius: 8px; 
+            padding: 10px 15px;
+            margin-top: 15px;
+        }
+        .comment-item { 
+            border-bottom: 1px solid #eef0f2; 
+            padding: 8px 0; 
+            font-size: 0.9em;
+        }
+        .comment-item:last-child { border-bottom: none; }
+        .comment-content { color: #444; }
+        .comment-meta { font-size: 0.75em; color: #aaa; margin-left: 5px; }
+        .floor-tag { 
+            background: #e0e0e0; color: #555; 
+            font-size: 0.7em; padding: 1px 4px; 
+            border-radius: 4px; margin-right: 5px; 
+        }
+
+        /* FAB (Floating Action Button) */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 12px rgba(16, 149, 193, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 100;
+            text-decoration: none;
+            border: none;
+        }
+        .fab:hover { background-color: var(--primary-hover); transform: scale(1.05); color: white; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; }
+        .modal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.open .modal-card { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-weight: bold; font-size: 1.2em; margin: 0; }
+        .close-btn { background: none; border: none; font-size: 1.5em; color: #999; cursor: pointer; padding: 0; line-height: 1; height: auto; width: auto; }
+        
+        /* Form adjustments */
+        textarea { resize: vertical; border-color: #ddd; }
+        .comment-form { display: flex; gap: 10px; margin-top: 10px; }
+        .comment-input { flex-grow: 1; margin-bottom: 0 !important; font-size: 0.9em; padding: 8px; height: 40px; }
+        .comment-btn { width: auto; margin-bottom: 0 !important; padding: 8px 15px; font-size: 0.9em; white-space: nowrap; }
+
+        .admin-link { text-align: center; display: block; margin-top: 30px; color: #ccc; font-size: 0.8em; }
     </style>
 </head>
 <body>
+    
+    <nav class="navbar">
+        <div class="container" style="display: flex; justify-content: center;">
+            <h1 class="navbar-title">🗣️ 校园吐槽墙</h1>
+        </div>
+    </nav>
+
     <main class="container">
-        <h1 style="text-align: center;">🗣️ 校园吐槽墙</h1>
-        <p style="text-align: center;">完全匿名，畅所欲言</p>
-
-        <!-- Post Form -->
-        <article>
-            <header><strong>我要吐槽</strong></header>
-            <form action="{% url 'add_post' %}" method="post">
-                {% csrf_token %}
-                {{ post_form.content }}
-                <button type="submit" style="margin-top: 10px;">发布吐槽</button>
-            </form>
-        </article>
-
-        <hr>
-
         <!-- Posts List -->
         {% for post in posts %}
-        <div class="post-card">
-            <p>{{ post.content|linebreaks }}</p>
-            <div class="meta-info">发布于 {{ post.created_at|date:"Y-m-d H:i" }}</div>
+        <article class="post-card">
+            <div class="post-content">{{ post.content|linebreaksbr }}</div>
+            <div class="post-meta">
+                <span>#{{ post.id }}</span>
+                <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
 
             <!-- Comments -->
             <div class="comment-section">
                 {% for comment in post.comments.all %}
                 <div class="comment-item">
-                    <strong>匿名:</strong> {{ comment.content }} 
-                    <span class="meta-info">({{ comment.created_at|date:"m-d H:i" }})</span>
+                    <span class="floor-tag">{{ forloop.counter }}楼</span>
+                    <span class="comment-content">{{ comment.content }}</span>
+                    <span class="comment-meta">{{ comment.created_at|date:"m-d H:i" }}</span>
                 </div>
                 {% empty %}
-                <div class="meta-info">暂无评论</div>
+                <div style="font-size: 0.8em; color: #999; text-align: center; padding: 5px;">暂无评论，快来抢沙发</div>
                 {% endfor %}
 
                 <!-- Comment Form -->
-                <form action="{% url 'add_comment' post.id %}" method="post" style="margin-top: 10px;">
+                <form action="{% url 'add_comment' post.id %}" method="post" class="comment-form">
                     {% csrf_token %}
-                    <div class="grid">
-                        <div>
-                            {{ comment_form.content }}
-                        </div>
-                        <div style="width: 100px;">
-                            <button type="submit" class="secondary outline" style="font-size: 0.8em; padding: 5px;">评论</button>
-                        </div>
-                    </div>
+                    <input type="text" name="content" class="comment-input" placeholder="发表评论..." required>
+                    <button type="submit" class="comment-btn outline">发送</button>
                 </form>
             </div>
-        </div>
+        </article>
         {% empty %}
-        <article>
-            <p style="text-align: center;">还没有人吐槽，快来抢沙发！</p>
+        <article class="post-card" style="text-align: center; padding: 50px;">
+            <h3>👻 这里静悄悄的</h3>
+            <p>还没有人吐槽，点击右下角 "+" 号发布第一条吐槽吧！</p>
         </article>
         {% endfor %}
+        
+        <a href="/admin/" class="admin-link">管理员入口</a>
     </main>
 
-    <a href="/admin/" class="admin-link">管理员入口</a>
+    <!-- FAB -->
+    <button class="fab" onclick="openModal()">+</button>
+
+    <!-- Post Modal -->
+    <div class="modal-overlay" id="postModal" onclick="if(event.target === this) closeModal()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">我要吐槽</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form action="{% url 'add_post' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" rows="6" placeholder="在这里写下你的吐槽..." required style="margin-bottom: 20px;"></textarea>
+                <button type="submit" style="width: 100%;">🚀 发送</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('postModal');
+        
+        function openModal() {
+            modal.style.display = 'flex';
+            // Force reflow for transition
+            modal.offsetHeight;
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
