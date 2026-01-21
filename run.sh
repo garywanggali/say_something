@@ -11,8 +11,9 @@ echo "Activating virtual environment..."
 # Use . instead of source for better compatibility (e.g. with sh/dash)
 . venv/bin/activate
 
-# 1. Install dependencies
+# 1. Upgrade pip and Install dependencies
 echo "Installing dependencies..."
+pip install --upgrade pip
 pip install -r requirements.txt
 
 # 2. Make and Apply database migrations
