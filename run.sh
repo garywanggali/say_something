@@ -30,8 +30,9 @@ echo "Starting server on port 5100..."
 # Kill any existing process on port 5100 (optional but safe)
 lsof -ti:5100 | xargs -r kill -9
 
-# Start with nohup
-nohup python3 manage.py runserver 0.0.0.0:5100 > runserver.log 2>&1 &
+# Start with nohup using the virtual environment's python
+# Use 'venv/bin/python3' explicitly to ensure we use the venv even inside nohup
+nohup venv/bin/python3 manage.py runserver 0.0.0.0:5100 > runserver.log 2>&1 &
 
 echo "=================================================="
 echo "✅ Server started successfully!"
