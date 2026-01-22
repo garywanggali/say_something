@@ -3,6 +3,7 @@ from django.db import models
 class Post(models.Model):
     content = models.TextField(verbose_name="吐槽内容")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="发布时间")
+    is_admin = models.BooleanField(default=False, verbose_name="是否管理员发布")
 
     class Meta:
         ordering = ['-created_at']
@@ -16,6 +17,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name="所属吐槽")
     content = models.TextField(verbose_name="评论内容")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="评论时间")
+    is_admin = models.BooleanField(default=False, verbose_name="是否管理员评论")
 
     class Meta:
         ordering = ['created_at']

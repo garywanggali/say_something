@@ -20,7 +20,11 @@ def add_post(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
-            form.save()
+            post = form.save(commit=False)
+            # Check if user is logged in and is staff/superuser
+            if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+                post.is_admin = True
+            post.save()
     return redirect('index')
 
 def add_comment(request, post_id):
@@ -30,5 +34,8 @@ def add_comment(request, post_id):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.post = post
+            # Check if user is logged in and is staff/superuser
+            if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+                comment.is_admin = True
             comment.save()
     return redirect('index')
