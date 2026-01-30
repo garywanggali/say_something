@@ -1,7 +1,18 @@
+import os
+
+def validate_image_size(value):
+    from django.core.exceptions import ValidationError
+    filesize = value.size
+    
+    # Limit to 5MB
+    if filesize > 5 * 1024 * 1024:
+        raise ValidationError("图片大小不能超过 5MB")
+
 from django.db import models
 
 class Post(models.Model):
     content = models.TextField(verbose_name="吐槽内容")
+    image = models.ImageField(upload_to='posts/', null=True, blank=True, verbose_name="配图", validators=[validate_image_size])
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="发布时间")
     is_admin = models.BooleanField(default=False, verbose_name="是否管理员发布")
 

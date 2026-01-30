@@ -54,6 +54,7 @@
         .post-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
         .post-content { font-size: 1em; color: #333; margin-bottom: 10px; white-space: pre-wrap; line-height: 1.5; }
+        .post-image { width: 100%; border-radius: 8px; margin-bottom: 10px; display: block; }
         .post-meta { font-size: 0.75em; color: #999; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         
         /* Hot Badge */
@@ -196,6 +197,9 @@
             {% for post in posts %}
             <article class="post-card">
                 <div class="post-content">{{ post.content|linebreaksbr }}</div>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" alt="吐槽配图" class="post-image" loading="lazy">
+                {% endif %}
                 <div class="post-meta">
                     <div>
                         {% if post.num_comments >= 3 %}
@@ -255,9 +259,16 @@
                 <div class="modal-title">我要吐槽</div>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
-            <form action="{% url 'add_post' %}" method="post">
+            <form action="{% url 'add_post' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <textarea name="content" rows="6" placeholder="在这里写下你的吐槽..." required style="margin-bottom: 20px;"></textarea>
+                <textarea name="content" rows="5" placeholder="在这里写下你的吐槽..." required style="margin-bottom: 15px;"></textarea>
+                
+                <!-- Image Upload Input -->
+                <label for="id_image" style="font-size: 0.9em; margin-bottom: 15px; display: block;">
+                    📷 配图 (可选，最大5MB):
+                    <input type="file" name="image" accept="image/*" id="id_image" style="margin-top: 5px;">
+                </label>
+
                 <button type="submit" style="width: 100%;">🚀 发送</button>
             </form>
         </div>

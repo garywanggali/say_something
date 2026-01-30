@@ -18,7 +18,7 @@ def index(request):
 
 def add_post(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             # Check if user is logged in and is staff/superuser
