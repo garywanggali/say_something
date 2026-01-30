@@ -26,16 +26,16 @@ echo "Checking admin user..."
 python3 init_admin.py
 
 # 4. Start the server
-echo "Starting server on port 5100..."
-# Kill any existing process on port 5100 (optional but safe)
-lsof -ti:5100 | xargs -r kill -9
+echo "Starting server on port 5001..."
+# Kill any existing process on port 5001 (optional but safe)
+lsof -ti:5001 | xargs -r kill -9
 
 # Start with nohup using the virtual environment's python
 # Use 'venv/bin/python3' explicitly to ensure we use the venv even inside nohup
-nohup venv/bin/python3 manage.py runserver 0.0.0.0:5100 > runserver.log 2>&1 &
+nohup venv/bin/python3 manage.py runserver 0.0.0.0:5001 > runserver.log 2>&1 &
 
 echo "=================================================="
 echo "✅ Server started successfully!"
-echo "📡 Access at: http://YOUR_SERVER_IP:5100/"
+echo "📡 Access at: http://YOUR_SERVER_IP:5001/"
 echo "📝 Logs are being written to: runserver.log"
 echo "=================================================="
